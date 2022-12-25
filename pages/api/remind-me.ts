@@ -25,11 +25,11 @@ function handler(
     req: NextApiRequest,
     res: NextApiResponse
   ) {
-    transporter.sendMail(mailOptions,async function (error, info) {
+    transporter.sendMail(mailOptions,function (error, info) {
         if (error) {
-            await res.status(404).json(error)
+            res.status(404).json(error)
         } else {
-            await res.status(200).json({ name: 'Reminded king' })
+            res.status(200).json({ name: 'Reminded king' })
         }
     });
     res.json({msg:"processing"})
