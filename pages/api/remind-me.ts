@@ -32,6 +32,7 @@ function handler(
             await res.status(200).json({ name: 'Reminded king' })
         }
     });
+    res.json({msg:"processing"})
   }
   
 export default verifySignature(handler);
