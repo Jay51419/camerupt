@@ -25,14 +25,9 @@ function handler(
     req: NextApiRequest,
     res: NextApiResponse
   ) {
-    transporter.sendMail(mailOptions,function (error, info) {
-        if (error) {
-            res.status(404).json(error)
-        } else {
-            res.status(200).json({ name: 'Reminded king' })
-        }
-    });
-    res.json({msg:"processing"})
+    transporter.sendMail(mailOptions)
+    .then(e=>(res.status(200).json({msg:"Reminded king"})))
+    .catch(err=>(res.json({msg:err})));
   }
   
 export default verifySignature(handler);
