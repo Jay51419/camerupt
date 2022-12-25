@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import { verifySignature } from "@upstash/qstash/nextjs";
 import nodemailer from "nodemailer"
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -20,7 +21,7 @@ const mailOptions = {
 }
 
 
-export default function handler(
+function handler(
     req: NextApiRequest,
     res: NextApiResponse
   ) {
@@ -33,3 +34,10 @@ export default function handler(
     });
   }
   
+export default verifySignature(handler);
+
+export const config = {
+    api: {
+      bodyParser: false,
+    },
+};
