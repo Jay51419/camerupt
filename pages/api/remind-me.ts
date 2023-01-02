@@ -9,34 +9,25 @@ const transporter = nodemailer.createTransport({
     pass: process.env.PASSWORD
   }
 });
-let wishlist: WishListSchema[]|undefined = []
-
-
-const mailOptions = {
-  from: process.env.EMAIL,
-  to: 'jaygandhi51419@gmail.com',
-  subject: 'Wishlist',
-  html: `
-        <ul>
-        ${wishlist.map(e => `<li>${e.name}</li>`)}  
-        </ul>
-    `
-}
-
 
 function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   db('SELECT * FROM wishlist')
-  .then(e => wishlist =e )
-  .then(_=>{
-    transporter.sendMail(mailOptions)
-    .then(e => (res.status(200).json({ msg: "Reminded king" })))
-    .catch(err => (res.json(err)));
-  })
-  .catch(err => console.log(err))
-  
+    .then(wishlist => transporter.sendMail({
+      from: process.env.EMAIL,
+      to: 'jaygandhi51419@gmail.com',
+      subject: 'Wishlist',
+      html: `
+          <ul>
+          ${wishlist ? wishlist.map(e => `<li>${e.name}</li>`) : "Databse error"}  
+          </ul>
+      `
+    })
+      .then(e => (res.status(200).json({ msg: "Reminded king" })))
+      .catch(err => (res.json(err))))
+
 }
 
 export default verifySignature(handler);
