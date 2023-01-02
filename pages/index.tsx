@@ -123,7 +123,7 @@ const WishlistCard = ({ id, name }: { id: string, name: string }) => {
     {showUpdateBtn && <button onClick={() => {
       setShowUpdateBtn(false)
     }}>
-      cancel!
+      cancel!!!!!
     </button>}
   </li>
 }
