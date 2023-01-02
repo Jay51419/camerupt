@@ -1,8 +1,7 @@
 import Head from 'next/head'
-import Image from 'next/image'
-import { Inter } from '@next/font/google'
 import styles from '../styles/Home.module.css'
 import { useEffect, useState } from 'react'
+import { useAtom, atom } from 'jotai'
 const handleGet = async (id?: string) => {
   const data = await fetch("/api/wishlist", {
     method: "GET",
@@ -47,9 +46,11 @@ interface WishList {
   name: string,
 }
 
+const wishlist = atom<any[]>([])
+
 export default function Home() {
   const [name, setName] = useState("")
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useAtom(wishlist)
   useEffect(() => {
     handleGet()
       .then(async res => setData(await res.json()))
@@ -97,6 +98,7 @@ export default function Home() {
 
 
 const WishlistCard = ({ id, name }: { id: string, name: string }) => {
+  const [data, setData] = useAtom(wishlist)
   const [updateName, setUpdateName] = useState(name)
   const [showUpdateBtn, setShowUpdateBtn] = useState(false)
 
@@ -104,7 +106,11 @@ const WishlistCard = ({ id, name }: { id: string, name: string }) => {
     {!showUpdateBtn ? name : <input type="text" min={1} value={updateName} onChange={e => setUpdateName(e.target.value)} />}
     {
       !showUpdateBtn && <button onClick={() => {
-        handleDelete(id)
+        handleDelete(id).then(_ => {
+          handleGet()
+            .then(async res => setData(await res.json()))
+            .catch(err => console.error(err))
+        })
       }}>delete</button>
     }
 
@@ -115,7 +121,11 @@ const WishlistCard = ({ id, name }: { id: string, name: string }) => {
     </button>}
     {showUpdateBtn && <button onClick={() => {
       if (updateName.length !== 0) {
-        handleUpdate(id, updateName).then(_=>setShowUpdateBtn(false))
+        handleUpdate(id, updateName).then(_ => {
+          handleGet()
+            .then(async res => setData(await res.json()))
+            .catch(err => console.error(err))
+        }).then(_ => setShowUpdateBtn(false))
       }
     }}>
       okay
