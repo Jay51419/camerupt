@@ -85,7 +85,7 @@ export default function Home() {
         <div>
           <ul>
             {
-              data.map(wish => <WishlistCard id={wish.id} name={wish.name} />
+              data.map(wish => <WishlistCard key={wish.id} id={wish.id} name={wish.name} />
               )
             }
           </ul>
