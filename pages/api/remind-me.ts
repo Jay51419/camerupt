@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { verifySignature } from "@upstash/qstash/nextjs";
 import nodemailer from "nodemailer"
-import db from "../../utils/db";
+import db, { WishListSchema } from "../../utils/db";
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -9,11 +9,7 @@ const transporter = nodemailer.createTransport({
     pass: process.env.PASSWORD
   }
 });
-interface WishList {
-  id: string,
-  name: string,
-}
-let wishlist: WishList[] = []
+let wishlist: WishListSchema[]|undefined = []
 
 
 const mailOptions = {
@@ -33,7 +29,7 @@ function handler(
   res: NextApiResponse
 ) {
   db('SELECT * FROM wishlist')
-  .then(e => wishlist = [e as unknown as WishList])
+  .then(e => wishlist =e )
   .then(_=>{
     transporter.sendMail(mailOptions)
     .then(e => (res.status(200).json({ msg: "Reminded king" })))
