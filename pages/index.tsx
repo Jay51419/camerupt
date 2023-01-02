@@ -2,10 +2,59 @@ import Head from 'next/head'
 import Image from 'next/image'
 import { Inter } from '@next/font/google'
 import styles from '../styles/Home.module.css'
+import { useEffect, useState } from 'react'
+const handleGet = async (id?: string) => {
+  const data = await fetch("/api/wishlist", {
+    method: "GET",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+  })
+  return data
+}
+const handleAdd = async (name: string) => {
+  const data = await fetch("/api/wishlist", {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ name })
+  })
+  return data
+}
+const handleDelete = async (id: string) => {
+  const data = await fetch("/api/wishlist", {
+    method: "DELETE",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ id })
+  })
+}
+const handleUpdate = async (id: string, name: string) => {
+  const data = await fetch("/api/wishlist", {
+    method: "PUT",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ id, name })
+  })
+  return data
+}
 
-const inter = Inter({ subsets: ['latin'] })
+interface WishList {
+  id: string,
+  name: string,
+}
 
 export default function Home() {
+  const [name, setName] = useState("")
+  const [data, setData] = useState<any[]>([])
+  useEffect(() => {
+    handleGet()
+      .then(async res => setData(await res.json()))
+      .catch(err => console.error(err))
+  }, [])
   return (
     <>
       <Head>
@@ -15,109 +64,66 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <div className={styles.description}>
-          <p>
-            Get started by editing&nbsp;
-            <code className={styles.code}>pages/index.tsx</code>
-          </p>
-          <div>
-            <a
-              href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              By{' '}
-              <Image
-                src="/vercel.svg"
-                alt="Vercel Logo"
-                className={styles.vercelLogo}
-                width={100}
-                height={24}
-                priority
-              />
-            </a>
-          </div>
+        <div>
+          <input min={1} type="text" onChange={e => setName(e.target.value)} value={name} />
+          <button onClick={() => {
+            if (name.length !== 0) {
+              handleAdd(name)
+                .then(async res => console.log(await res.json()))
+                .then(e => setName(""))
+                .then(e => (
+                  handleGet()
+                    .then(async res => setData(await res.json()))
+                    .catch(err => console.error(err))
+                )
+                )
+
+            }
+          }
+          }>Add</button>
         </div>
-
-        <div className={styles.center}>
-          <Image
-            className={styles.logo}
-            src="/next.svg"
-            alt="Next.js Logo"
-            width={180}
-            height={37}
-            priority
-          />
-          <div className={styles.thirteen}>
-            <Image
-              src="/thirteen.svg"
-              alt="13"
-              width={40}
-              height={31}
-              priority
-            />
-          </div>
-        </div>
-
-        <div className={styles.grid}>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Docs <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Find in-depth information about Next.js features and&nbsp;API.
-            </p>
-          </a>
-
-          <a
-            href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Learn <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Learn about Next.js in an interactive course with&nbsp;quizzes!
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Templates <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Discover and deploy boilerplate example Next.js&nbsp;projects.
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Deploy <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Instantly deploy your Next.js site to a shareable URL
-              with&nbsp;Vercel.
-            </p>
-          </a>
+        <div>
+          <ul>
+            {
+              data.map(wish => <WishlistCard id={wish.id} name={wish.name} />
+              )
+            }
+          </ul>
         </div>
       </main>
     </>
   )
+}
+
+
+const WishlistCard = ({ id, name }: { id: string, name: string }) => {
+  const [updateName, setUpdateName] = useState(name)
+  const [showUpdateBtn, setShowUpdateBtn] = useState(false)
+
+  return <li key={id} >
+    {!showUpdateBtn ? name : <input type="text" min={1} value={updateName} onChange={e => setUpdateName(e.target.value)} />}
+    {
+      !showUpdateBtn && <button onClick={() => {
+        handleDelete(id)
+      }}>delete</button>
+    }
+
+    {!showUpdateBtn && <button onClick={() => {
+      setShowUpdateBtn(true)
+    }}>
+      update
+    </button>}
+    {showUpdateBtn && <button onClick={() => {
+      if (updateName.length !== 0) {
+        handleUpdate(id, updateName).then(_=>setShowUpdateBtn(false))
+      }
+    }}>
+      okay
+    </button>}
+    {showUpdateBtn && <button onClick={() => {
+      setShowUpdateBtn(false)
+    }}>
+      cancel
+    </button>}
+  </li>
 }

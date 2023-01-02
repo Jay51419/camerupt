@@ -16,6 +16,8 @@
     "@upstash/qstash": "^0.3.2",
     "eslint": "8.30.0",
     "eslint-config-next": "13.1.1",
+    "jotai": "^1.12.1",
+    "mysql2": "^2.3.3",
     "next": "13.1.1",
     "nodemailer": "^6.8.0",
     "react": "18.2.0",

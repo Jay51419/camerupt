@@ -27,7 +27,7 @@ function handler(
   ) {
     transporter.sendMail(mailOptions)
     .then(e=>(res.status(200).json({msg:"Reminded king"})))
-    .catch(err=>(res.json({msg:err})));
+    .catch(err=>(res.json(err)));
   }
   
 export default verifySignature(handler);
