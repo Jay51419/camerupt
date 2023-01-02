@@ -14,9 +14,7 @@ interface WishList {
   name: string,
 }
 let wishlist: WishList[] = []
-db('SELECT * FROM wishlist')
-  .then(e => wishlist = [e as unknown as WishList])
-  .catch(err => console.log(err))
+
 
 const mailOptions = {
   from: process.env.EMAIL,
@@ -24,7 +22,7 @@ const mailOptions = {
   subject: 'Wishlist',
   html: `
         <ul>
-        ${wishlist.map(e => `<li>${e}</li>`)}  
+        ${wishlist.map(e => `<li>${e.name}</li>`)}  
         </ul>
     `
 }
@@ -34,9 +32,15 @@ function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  transporter.sendMail(mailOptions)
+  db('SELECT * FROM wishlist')
+  .then(e => wishlist = [e as unknown as WishList])
+  .then(_=>{
+    transporter.sendMail(mailOptions)
     .then(e => (res.status(200).json({ msg: "Reminded king" })))
     .catch(err => (res.json(err)));
+  })
+  .catch(err => console.log(err))
+  
 }
 
 export default verifySignature(handler);
